@@ -1,0 +1,46 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+service PriceService {
+  rpc Get(GetMultipleItemPriceRequest) returns (stream ItemPrice);
+}
+
+message GetMultipleItemPriceRequest {
+    string Realm = 1;
+    string Territory = 5;
+    string Language  = 10;
+    repeated string ItemNumber = 15;
+}
+
+message ItemPrice {
+  string Id = 1;
+  string ItemNumber = 5;
+  string Realm = 10;
+  string Territory = 15;
+  string Dataset = 20;
+  string CurrencyCode = 25;
+  
+  Pricing Price = 30;
+  Pricing SalePrice = 35;
+  Pricing WasPrice = 40;
+  
+  repeated Option Options = 45;
+  repeated History PriceHistory = 50;
+}
+
+message Pricing {
+  double MinPrice = 1;
+  double MaxPrice = 5;
+}
+
+message Option {
+  optional string OptionNumber = 1;
+  optional double Price= 5;
+  optional bool IsSalePrice = 10;
+}
+
+message History {
+  optional google.protobuf.Timestamp DatePoint = 1;
+  optional double MinPrice = 5;
+  optional double MaxPrice = 10;
+}
