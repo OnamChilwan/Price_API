@@ -8,8 +8,8 @@ public class DecoratorContext
         IEnumerable<ItemPriceEntity> entities,
         IEnumerable<string> requestedItemNumbers)
     {
-        Entities = entities;
-        RequestedItemNumbers = requestedItemNumbers;
+        Entities = entities.ToList().AsReadOnly();
+        RequestedItemNumbers = requestedItemNumbers.ToList().AsReadOnly();
     }
     
     public static DecoratorContext Initialise(
@@ -19,7 +19,7 @@ public class DecoratorContext
         return new DecoratorContext(entities, requestedItemNumbers);
     }
     
-    public IEnumerable<ItemPriceEntity> Entities { get; }
+    public IReadOnlyCollection<ItemPriceEntity> Entities { get; }
 
-    public IEnumerable<string> RequestedItemNumbers { get; }
+    public IReadOnlyCollection<string> RequestedItemNumbers { get; }
 }

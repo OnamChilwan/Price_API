@@ -2,7 +2,6 @@ using Price.Application.DTOs;
 
 namespace Price.Application.Decorators;
 
-// TODO: Unit tests
 public class MissingItemsDecorator : IDecorator
 {
     private readonly IDecorator _next;

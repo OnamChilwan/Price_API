@@ -1,6 +1,5 @@
 using Price.Application.DTOs;
 using Price.Application.Features;
-using Price.Application.Models;
 
 namespace Price.Application.Decorators;
 

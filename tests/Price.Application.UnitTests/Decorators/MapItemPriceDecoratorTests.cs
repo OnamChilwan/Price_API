@@ -2,7 +2,6 @@ using FluentAssertions;
 using NUnit.Framework;
 using Price.Application.Decorators;
 using Price.Application.DTOs;
-using Price.Application.Models;
 using Price.Infrastructure.Entities;
 
 namespace Price.Application.UnitTests.Decorators;
