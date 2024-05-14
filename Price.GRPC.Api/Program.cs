@@ -16,11 +16,6 @@ var builder = WebHost
             7001, 
             o => o.Protocols = HttpProtocols.Http2);
     })
-    .ConfigureServices(s =>
-    {
-        // s.AddControllers();
-        // s.AddEndpointsApiExplorer();
-    })
     .ConfigureAppConfiguration(app =>
     {
         app.AddConfiguration(config);

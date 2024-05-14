@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Azure.Cosmos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,10 +9,9 @@ using Price.Application.Decorators;
 using Price.Application.DTOs;
 using Price.Application.Features;
 using Price.Application.Services;
-using Price.GRPC.Api.Configuration;
 using Price.GRPC.Api.Endpoints;
+using Price.GRPC.Api.Middleware;
 using Price.GRPC.Api.Validators;
-using Price.Infrastructure.Factories;
 using Price.Infrastructure.Queries;
 
 namespace Price.GRPC.Api;
@@ -28,12 +27,13 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
     {
+        app.UseMiddleware<SalesFeatureMiddleware>();
+        app.UseMiddleware<TimeMachineMiddleware>();
         app.UseRouting();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapGrpcReflectionService();
             endpoints.MapGrpcService<PriceProtoService>();
-            // endpoints.MapControllers();
         });
     }
 
@@ -41,8 +41,14 @@ public class Startup
     {
         ConfigureExternalDependencies(services);
         
-        services.AddGrpc();
+        services.AddGrpc(options =>
+        {
+            // options.Interceptors.Add<ServerLoggerInterceptor>();
+        });
         services.AddGrpcReflection();
+        
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
         services.AddScoped<IValidator<GetMultipleItemPriceRequest>, GetMultipleItemPriceRequestValidator>();
         
         // Decorators
@@ -54,11 +60,7 @@ public class Startup
         services.AddTransient<PriceApplicationService>();
 
         ConfigureMapper(services);
-        
-        services.AddScoped<SalesFeature>(_ => SalesFeature.Default());
-        services.AddScoped<TimeMachineFeature>(_ => TimeMachineFeature.Default());
-
-        // ConfigureFeatures(services);
+        ConfigureFeatures(services);
     }
     
     protected virtual void ConfigureExternalDependencies(IServiceCollection services)
@@ -71,20 +73,20 @@ public class Startup
         services.AddAutoMapper(typeof(ItemPrice).Assembly, typeof(PriceDto).Assembly);
     }
 
-    // private static void ConfigureFeatures(IServiceCollection services)
-    // {
-    //     services.AddScoped(sp =>
-    //     {
-    //         var ctx = sp.GetRequiredService<IHttpContextAccessor>();
-    //         var feature = ctx.HttpContext.Features.Get<SalesFeature>();
-    //         return feature ?? SalesFeature.Default();   
-    //     });
-    //
-    //     services.AddScoped(sp =>
-    //     {
-    //         var ctx = sp.GetRequiredService<IHttpContextAccessor>();
-    //         var feature = ctx.HttpContext.Features.Get<TimeMachineFeature>();
-    //         return feature ?? TimeMachineFeature.Default();
-    //     });
-    // }
+    private static void ConfigureFeatures(IServiceCollection services)
+    {
+        services.AddScoped(sp =>
+        {
+            var ctx = sp.GetRequiredService<IHttpContextAccessor>();
+            var feature = ctx.HttpContext.Features.Get<SalesFeature>();
+            return feature ?? SalesFeature.Default();   
+        });
+    
+        services.AddScoped(sp =>
+        {
+            var ctx = sp.GetRequiredService<IHttpContextAccessor>();
+            var feature = ctx.HttpContext.Features.Get<TimeMachineFeature>();
+            return feature ?? TimeMachineFeature.Default();
+        });
+    }
 }
