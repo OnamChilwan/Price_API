@@ -30,15 +30,15 @@ public class ItemPriceDto
         PriceHistory = priceHistory;
     }
     
-    public string? Id { get; set; }
+    public string Id { get; init; }
     
     public string ItemNumber { get; init; }
     
-    public string? Realm { get; set; }
+    public string Realm { get; init; }
     
-    public string? Territory { get; set; }
+    public string Territory { get; init; }
     
-    public string? Dataset { get; set; }
+    public string Dataset { get; init; }
     
     public string? CurrencyCode { get; set; }
     

@@ -1,6 +1,4 @@
 using FluentValidation;
-using Microsoft.Azure.Cosmos;
-using Price.Api.Configuration;
 using Price.Api.Middleware;
 using Price.Api.Models.Responses;
 using Price.Api.Validators;
@@ -8,7 +6,6 @@ using Price.Application.Decorators;
 using Price.Application.DTOs;
 using Price.Application.Features;
 using Price.Application.Services;
-using Price.Infrastructure.Factories;
 using Price.Infrastructure.Queries;
 
 namespace Price.Api;
@@ -35,11 +32,10 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        ConfigureExternalDependencies(services);
-
-        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddControllers().AddApplicationPart(typeof(Startup).Assembly);
+        services.AddRouting();
+        
         services.AddValidatorsFromAssemblyContaining<GetMultipleItemPriceRequestValidator>();
-        services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
         
         // Decorators
         services.AddScoped<IDecorator, MapItemPriceDecorator>();
@@ -51,18 +47,24 @@ public class Startup
 
         ConfigureMapper(services);
         ConfigureFeatures(services);
+        
+        ConfigureExternalDependencies(services);
     }
 
     protected virtual void ConfigureExternalDependencies(IServiceCollection services)
     {
+        // services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        
         // This can go in program.cs
-        var cosmosDbSettings = new CosmosDbSettings();
-        _configuration.Bind("CosmosDb", cosmosDbSettings);
+        // var cosmosDbSettings = new CosmosDbSettings();
+        // _configuration.Bind("CosmosDb", cosmosDbSettings);
         
-        var cosmosClient = new CosmosClient(cosmosDbSettings.Endpoint, cosmosDbSettings.Key);
+        // var cosmosClient = new CosmosClient(cosmosDbSettings.Endpoint, cosmosDbSettings.Key);
+        // services.AddTransient(_ => new CosmosContainerFactory(cosmosClient, cosmosDbSettings.DatabaseId));
         
-        services.AddTransient(_ => new CosmosContainerFactory(cosmosClient, cosmosDbSettings.DatabaseId));
         services.AddTransient<IGetMultiplePricesQuery, CosmosGetMultiplePricesQuery>();
+        services.AddTransient<IGetMultiplePricesQuery, FakeGetMultiplePricesQuery>();
     }
 
     private static void ConfigureMapper(IServiceCollection services)

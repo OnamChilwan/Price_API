@@ -16,28 +16,19 @@ public class MapItemPriceDecorator : IDecorator
                 entity.ItemNumber,
                 entity.Realm,
                 entity.Territory,
-                entity.Dataset,
-                "GBP",
-                new PriceDto(entity.Price.MinPrice, entity.Price.MaxPrice),
+                entity.Dataset, // TODO: driven by settings
+                "GBP", // TODO: driven by settings
+                MapPrice(entity.Price.MinPrice, entity.Price.MaxPrice),
                 MapOptions(entity),
                 MapPriceHistory(entity)));
-            
-            // {
-            //     Dataset = entity.Dataset,
-            //     Id = entity.Id,
-            //     Realm = entity.Realm,
-            //     Territory = entity.Territory,
-            //     CurrencyCode = "GBP", // Default
-            //     ItemNumber = entity.ItemNumber,
-            //     Price = new PriceDto(entity.Price.MinPrice, entity.Price.MaxPrice),
-            //     Options = MapOptions(entity),
-            //     PriceHistory = MapPriceHistory(entity),
-            //     SalePrice = null, //new PriceDto(),
-            //     WasPrice = null //new PriceDto()
-            // });
         }
 
         return Task.FromResult<IEnumerable<ItemPriceDto>>(result);
+    }
+
+    private static PriceDto MapPrice(decimal minPrice, decimal maxPrice)
+    {
+        return new PriceDto(minPrice, maxPrice);
     }
 
     private static IEnumerable<PriceHistoryDto> MapPriceHistory(ItemPriceEntity entity)

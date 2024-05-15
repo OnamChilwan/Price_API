@@ -5,11 +5,15 @@ var config = CreateConfiguration().Build();
 
 var builder = WebHost
     .CreateDefaultBuilder(args)
-    .ConfigureServices(s =>
+    .ConfigureServices((ctx, services) =>
     {
-        s.AddControllers();
-        s.AddEndpointsApiExplorer();
-        s.AddSwaggerGen();
+        // This can go in program.cs
+        // var cosmosDbSettings = new CosmosDbSettings();
+        // _configuration.Bind("CosmosDb", cosmosDbSettings);
+        
+        services.AddControllers();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
     })
     .ConfigureAppConfiguration(app =>
     {
@@ -34,8 +38,6 @@ var builder = WebHost
 // app.MapControllers();
 
 await builder.Build().RunAsync();
-
-//app.Run();
 
 static IConfigurationBuilder CreateConfiguration()
 {
