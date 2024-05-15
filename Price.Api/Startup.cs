@@ -1,4 +1,6 @@
 using FluentValidation;
+using Microsoft.Azure.Cosmos;
+using Price.Api.Configuration;
 using Price.Api.Middleware;
 using Price.Api.Models.Responses;
 using Price.Api.Validators;
@@ -6,6 +8,7 @@ using Price.Application.Decorators;
 using Price.Application.DTOs;
 using Price.Application.Features;
 using Price.Application.Services;
+using Price.Infrastructure.Factories;
 using Price.Infrastructure.Queries;
 
 namespace Price.Api;
@@ -13,7 +16,7 @@ namespace Price.Api;
 public class Startup
 {
     private readonly IConfiguration _configuration;
-
+    
     public Startup(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -53,16 +56,14 @@ public class Startup
 
     protected virtual void ConfigureExternalDependencies(IServiceCollection services)
     {
-        // services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
+        services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         
-        // This can go in program.cs
-        // var cosmosDbSettings = new CosmosDbSettings();
-        // _configuration.Bind("CosmosDb", cosmosDbSettings);
+        var cosmosDbSettings = new CosmosDbSettings();
+        _configuration.Bind("CosmosDb", cosmosDbSettings);
         
-        // var cosmosClient = new CosmosClient(cosmosDbSettings.Endpoint, cosmosDbSettings.Key);
-        // services.AddTransient(_ => new CosmosContainerFactory(cosmosClient, cosmosDbSettings.DatabaseId));
-        
+        var cosmosClient = new CosmosClient(cosmosDbSettings.Endpoint, cosmosDbSettings.Key);
+        services.AddTransient(_ => new CosmosContainerFactory(cosmosClient, cosmosDbSettings.DatabaseId));
         services.AddTransient<IGetMultiplePricesQuery, CosmosGetMultiplePricesQuery>();
         services.AddTransient<IGetMultiplePricesQuery, FakeGetMultiplePricesQuery>();
     }
@@ -77,14 +78,14 @@ public class Startup
         services.AddScoped(sp =>
         {
             var ctx = sp.GetRequiredService<IHttpContextAccessor>();
-            var feature = ctx.HttpContext.Features.Get<SalesFeature>();
+            var feature = ctx.HttpContext!.Features.Get<SalesFeature>();
             return feature ?? SalesFeature.Default();   
         });
 
         services.AddScoped(sp =>
         {
             var ctx = sp.GetRequiredService<IHttpContextAccessor>();
-            var feature = ctx.HttpContext.Features.Get<TimeMachineFeature>();
+            var feature = ctx.HttpContext!.Features.Get<TimeMachineFeature>();
             return feature ?? TimeMachineFeature.Default();
         });
     }

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using Price.Api.Middleware;
 using Price.Application.Features;
 using Price.Infrastructure.Queries;
 
@@ -22,9 +21,6 @@ public class TestStartup : Startup
         var context = Substitute.For<IHttpContextAccessor>();
         context.HttpContext.Returns(Substitute.For<HttpContext>());
         
-        //context.HttpContext?.Features.Set(SalesFeature.Default());
-        //context.HttpContext?.Features.Set(TimeMachineFeature.Default());
-    
         services.AddSingleton(context);
     }
     
