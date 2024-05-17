@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Bogus;
 using Price.Infrastructure.Entities;
 
@@ -5,12 +6,10 @@ namespace Price.Api.ComponentTests.Fakes;
 
 public sealed class OptionFaker : Faker<OptionEntity>
 {
-    public OptionFaker()
+    public OptionFaker(string optionNumber)
     {
-        var salePricePeriodFaker = new SalePricePeriodFaker();
-        var optionNumber = 1;
-        RuleFor(x => x.OptionNumber, f => optionNumber++.ToString("00"));
+        RuleFor(x => x.OptionNumber, f => optionNumber);
         RuleFor(x => x.Price, f => decimal.Parse(f.Commerce.Price()));
-        RuleFor(x => x.SalePricePeriods, f => salePricePeriodFaker.Generate(4));
+        RuleFor(x => x.SalePricePeriods, new List<SalePricePeriodEntity>());
     }
 }

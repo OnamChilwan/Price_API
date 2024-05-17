@@ -7,7 +7,7 @@ public sealed class PriceFaker : Faker<PriceEntity>
 {
     public PriceFaker()
     {
-        RuleFor(x => x.MaxPrice, f => f.Random.Decimal(50, 100));
-        RuleFor(x => x.MinPrice, f => f.Random.Decimal(10, 49));
+        RuleFor(x => x.MaxPrice, f => decimal.Parse(f.Commerce.Price(50, 100)));
+        RuleFor(x => x.MinPrice, f => decimal.Parse(f.Commerce.Price(10, 49)));
     }
 }

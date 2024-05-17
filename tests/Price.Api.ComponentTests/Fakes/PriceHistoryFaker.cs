@@ -7,8 +7,8 @@ public sealed class PriceHistoryFaker : Faker<PriceHistoryEntity>
 {
     public PriceHistoryFaker()
     {
-        RuleFor(x => x.MaxPrice, f => f.Random.Decimal(100, 200));
-        RuleFor(x => x.MinPrice, f => f.Random.Decimal(50, 99));
-        RuleFor(x => x.DatePoint, f => f.Date.Past());
+        RuleFor(x => x.MaxPrice, f => decimal.Parse(f.Commerce.Price(100, 200)));
+        RuleFor(x => x.MinPrice, f => decimal.Parse(f.Commerce.Price(50, 99)));
+        RuleFor(x => x.DatePoint, f => f.Date.Past().Date);
     }
 }

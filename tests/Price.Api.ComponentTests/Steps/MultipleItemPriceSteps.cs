@@ -79,30 +79,58 @@ public class MultipleItemPriceSteps
             
                 optionEntity.OptionNumber.Should().Be(option.OptionNumber);
                 optionEntity.Price.Should().Be(option.Price);
-            
                 optionEntity.SalePricePeriods.Should().BeEquivalentTo(option.SalePricePeriods);
             }
-
-            item.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
         }
     }
+
+    // public void PriceHistoryIsPresent(params ItemPriceEntity[] entities)
+    // {
+    //     foreach (var entity in entities)
+    //     {
+    //         var item = _result.Single(x => x.ItemNumber.Equals(entity.ItemNumber));
+    //         item.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
+    //     }
+    // }
     
+    // public void PriceHistoryIsNotPresent(params ItemPriceEntity[] entities)
+    // {
+    //     foreach (var item in _result)
+    //     {
+    //         item.PriceHistory.Should().BeEmpty();
+    //     }
+    // }
+
     public void SaleInformationIsNotPresent()
     {
         foreach (var item in _result)
         {
             item.WasPrice.Should().BeNull();
             item.SalePrice.Should().BeNull();
+            item.PriceHistory.Should().BeEmpty();
         }
     }
 
-    public void SaleInformationIsPresent()
+    public void SaleInformationIsPresent(ItemPriceEntity entity, decimal salePrice)
     {
-        foreach (var item in _result)
+        var item = _result.SingleOrDefault(x => x.ItemNumber.Equals(entity.ItemNumber));
+
+        if (item != null)
         {
-            item.SalePrice.Should().NotBeNull();
-            item.WasPrice.Should().NotBeNull();
-            item.PriceHistory.Should().NotBeEmpty();
+            item.SalePrice.MaxPrice.Should().Be(salePrice);
+            item.SalePrice.MinPrice.Should().Be(salePrice);
+            item.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
+            // item.WasPrice.Should().NotBeNull();
+        }
+    }
+    
+    public void NoActiveSalePriceIsPresent(params ItemPriceEntity[] entities)
+    {
+        foreach (var entity in entities)
+        {
+            var item = _result.SingleOrDefault(x => x.ItemNumber.Equals(entity.ItemNumber));
+            item?.SalePrice.Should().BeNull();
+            item?.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
         }
     }
     

@@ -18,7 +18,7 @@ public class ItemPrice
 
     public Price SalePrice { get; set; }
 
-    public Price WasPrice { get; set; }
+    public Price WasPrice { get; set; } // TODO: implement set
 
     public IEnumerable<Option> Options { get; set; }
 
