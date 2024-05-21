@@ -48,7 +48,7 @@ public class MultipleItemPriceSteps
         _httpResponse = await client.GetAsync($"/price/{realm}/{territory}/{language}/v1/prices?{query}");
     }
 
-    public async Task CorrectHttpResponseCodeIsReturned()
+    public async Task AnOKHttpReponseIsReturned()
     {
         _httpResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         _result = await _httpResponse.Content.ReadFromJsonAsync<IEnumerable<ItemPrice>>() ?? Enumerable.Empty<ItemPrice>();
@@ -84,53 +84,59 @@ public class MultipleItemPriceSteps
         }
     }
 
-    // public void PriceHistoryIsPresent(params ItemPriceEntity[] entities)
-    // {
-    //     foreach (var entity in entities)
-    //     {
-    //         var item = _result.Single(x => x.ItemNumber.Equals(entity.ItemNumber));
-    //         item.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
-    //     }
-    // }
-    
-    // public void PriceHistoryIsNotPresent(params ItemPriceEntity[] entities)
-    // {
-    //     foreach (var item in _result)
-    //     {
-    //         item.PriceHistory.Should().BeEmpty();
-    //     }
-    // }
-
-    public void SaleInformationIsNotPresent()
+    public void SaleInformationIsNotPresent(params string[] itemNumbers)
     {
-        foreach (var item in _result)
+        foreach (var item in _result.Where(x => itemNumbers.Contains(x.ItemNumber)))
         {
-            item.WasPrice.Should().BeNull();
             item.SalePrice.Should().BeNull();
             item.PriceHistory.Should().BeEmpty();
         }
     }
-
-    public void SaleInformationIsPresent(ItemPriceEntity entity, decimal salePrice)
+    
+    public void SaleInformationIsNotPresentForAllItems()
+    {
+        foreach (var item in _result)
+        {
+            item.SalePrice.Should().BeNull();
+        }
+    }
+    
+    public void SaleInformationIsPresent(ItemPriceEntity entity, decimal salePrice, decimal wasPriceMin, decimal wasPriceMax)
     {
         var item = _result.SingleOrDefault(x => x.ItemNumber.Equals(entity.ItemNumber));
 
         if (item != null)
         {
-            item.SalePrice.MaxPrice.Should().Be(salePrice);
             item.SalePrice.MinPrice.Should().Be(salePrice);
-            item.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
-            // item.WasPrice.Should().NotBeNull();
+            item.SalePrice.MaxPrice.Should().Be(salePrice);
+            item.WasPrice.MinPrice.Should().Be(wasPriceMin);
+            item.WasPrice.MaxPrice.Should().Be(wasPriceMax);
         }
     }
     
-    public void NoActiveSalePriceIsPresent(params ItemPriceEntity[] entities)
+    public void WasPriceIsPresent(ItemPriceEntity entity, decimal wasPriceMin, decimal wasPriceMax)
     {
-        foreach (var entity in entities)
+       var item = _result.Single(x => x.ItemNumber.Equals(entity.ItemNumber));
+       item.WasPrice.MinPrice.Should().Be(wasPriceMin);
+       item.WasPrice.MaxPrice.Should().Be(wasPriceMax);
+       item.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
+    }
+
+    public void WasPriceIsNotPresent(params string[] itemNumbers)
+    {
+        var items = _result.Where(x => itemNumbers.Contains(x.ItemNumber));
+
+        foreach (var item in items)
         {
-            var item = _result.SingleOrDefault(x => x.ItemNumber.Equals(entity.ItemNumber));
-            item?.SalePrice.Should().BeNull();
-            item?.PriceHistory.Should().BeEquivalentTo(entity.PriceHistory);
+            item.WasPrice.Should().BeNull();
+        }
+    }
+
+    public void WasPriceIsNotPresentForAllItems()
+    {
+        foreach (var itemPrice in _result)
+        {
+            itemPrice.WasPrice.Should().BeNull();
         }
     }
     

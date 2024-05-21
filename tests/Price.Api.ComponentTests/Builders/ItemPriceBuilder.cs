@@ -19,10 +19,10 @@ public class ItemPriceBuilder
         
         return this;
     }
-
+    
     public ItemPriceBuilder WithPriceHistory(params string[] itemNumbers)
     {
-        var faker = new PriceHistoryFaker();
+        var faker = new PriceHistoryFaker(null, null);
         
         foreach (var itemNumber in itemNumbers)
         {
@@ -32,6 +32,19 @@ public class ItemPriceBuilder
             {
                 item.PriceHistory = faker.Generate(5);    
             }
+        }
+        
+        return this;
+    }
+    
+    public ItemPriceBuilder WithPriceHistory(string itemNumber, ref decimal minimumPrice, ref decimal maximumPrice)
+    {
+        var item = _entities.SingleOrDefault(x => x.ItemNumber.Equals(itemNumber));
+            
+        if (item != null)
+        {
+            var faker = new PriceHistoryFaker(minimumPrice, maximumPrice);
+            item.PriceHistory.Add(faker.Generate());
         }
         
         return this;
