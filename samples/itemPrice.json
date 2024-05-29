@@ -1,0 +1,18 @@
+{
+  "id": "next-gb-gold-123",
+  "itemNumber": "123",
+  "priceGroupCode": "gbp",
+  "realm": "next",
+  "territory": "gb",
+  "dataset": "gold",
+  "price": {
+    "minPrice": "5.99",
+    "maxPrice": "15.99"
+  },
+  "options": [{
+    "optionNumber": "01",
+    "price": "11.99",
+    "salePricePeriods": [ ]
+  }],
+  "priceHistory": [ ]
+}

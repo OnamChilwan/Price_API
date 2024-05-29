@@ -39,6 +39,7 @@ public class Startup
         services.AddRouting();
         
         services.AddValidatorsFromAssemblyContaining<GetMultipleItemPriceRequestValidator>();
+        services.AddDaprClient();
         
         // Decorators
         services.AddScoped<IDecorator, MapItemPriceDecorator>();
@@ -59,13 +60,14 @@ public class Startup
         services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         
-        var cosmosDbSettings = new CosmosDbSettings();
-        _configuration.Bind("CosmosDb", cosmosDbSettings);
+        // var cosmosDbSettings = new CosmosDbSettings();
+        // _configuration.Bind("CosmosDb", cosmosDbSettings);
         
-        var cosmosClient = new CosmosClient(cosmosDbSettings.Endpoint, cosmosDbSettings.Key);
-        services.AddTransient(_ => new CosmosContainerFactory(cosmosClient, cosmosDbSettings.DatabaseId));
-        services.AddTransient<IGetMultiplePricesQuery, CosmosGetMultiplePricesQuery>();
-        services.AddTransient<IGetMultiplePricesQuery, FakeGetMultiplePricesQuery>();
+        // var cosmosClient = new CosmosClient(cosmosDbSettings.Endpoint, cosmosDbSettings.Key);
+        // services.AddTransient(_ => new CosmosContainerFactory(cosmosClient, cosmosDbSettings.DatabaseId));
+        // services.AddTransient<IGetMultiplePricesQuery, CosmosGetMultiplePricesQuery>();
+        // services.AddTransient<IGetMultiplePricesQuery, FakeGetMultiplePricesQuery>();
+        services.AddTransient<IGetMultiplePricesQuery, DaprGetMultiplePricesQuery>();
     }
 
     private static void ConfigureMapper(IServiceCollection services)
