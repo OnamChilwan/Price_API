@@ -7,7 +7,7 @@ using Price.Infrastructure.Queries;
 
 namespace Price.Api.ComponentTests;
 
-public class TestStartup : Startup
+public class TestStartup : GRPC.Api.Startup
 {
     public TestStartup() : base(BuildConfiguration())
     {

@@ -22,4 +22,8 @@
       <ProjectReference Include="..\..\Price.GRPC.Api\Price.GRPC.Api.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Mappers\" />
+    </ItemGroup>
+
 </Project>
