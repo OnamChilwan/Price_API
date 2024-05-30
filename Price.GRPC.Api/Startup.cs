@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Price.Application.Decorators;
-using Price.Application.DTOs;
 using Price.Application.Features;
 using Price.Application.Services;
 using Price.GRPC.Api.Endpoints;

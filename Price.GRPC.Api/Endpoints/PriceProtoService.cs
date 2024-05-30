@@ -26,45 +26,31 @@ public class PriceProtoService(
             request.Territory,
             "gold",
             request.ItemNumber);
-        
-        var result = Map(itemPrices);
 
-        foreach (var item in result)
+        foreach (var item in Map(itemPrices))
         {
             await responseStream.WriteAsync(item);
         }
     }
 
-    private static IEnumerable<ItemPrice> Map(IEnumerable<ItemPriceDto> dtos)
+    private static IEnumerable<ItemPrice> Map(IEnumerable<ItemPriceDto> items)
     {
-        foreach (var dto in dtos)
+        foreach (var item in items)
         {
             yield return new ItemPrice
             {
-                Territory = dto.Territory,
-                ItemNumber = dto.ItemNumber,
-                Dataset = dto.Dataset,
-                Realm = dto.Realm,
-                Id = dto.Id,
-                CurrencyCode = dto.CurrencyCode,
-                SalePrice = new Pricing
-                {
-                    MaxPrice = decimal.ToDouble(dto.SalePrice.MaxPrice),
-                    MinPrice = decimal.ToDouble(dto.SalePrice.MinPrice)
-                },
-                WasPrice = new Pricing
-                {
-                    MaxPrice = decimal.ToDouble(dto.WasPrice.MaxPrice),
-                    MinPrice = decimal.ToDouble(dto.WasPrice.MinPrice)
-                },
-                Price = new Pricing
-                {
-                    MaxPrice = decimal.ToDouble(dto.Price.MaxPrice),
-                    MinPrice = decimal.ToDouble(dto.Price.MinPrice),
-                },
+                Territory = item.Territory,
+                ItemNumber = item.ItemNumber,
+                Dataset = item.Dataset,
+                Realm = item.Realm,
+                Id = item.Id,
+                CurrencyCode = item.CurrencyCode,
+                SalePrice = MapPrice(item.SalePrice),
+                WasPrice = MapPrice(item.WasPrice),
+                Price = MapPrice(item.Price),
                 Options =
                 {
-                    dto.Options.Select(x => new Option
+                    item.Options.Select(x => new Option
                     {
                         OptionNumber = x.OptionNumber,
                         Price = decimal.ToDouble(x.Price),
@@ -73,20 +59,29 @@ public class PriceProtoService(
                 },
                 PriceHistory =
                 {
-                    dto.PriceHistory.Select(x => new History
+                    item.PriceHistory.Select(x => new History
                     {
                         MaxPrice = decimal.ToDouble(x.MaxPrice ?? 0),
                         MinPrice = decimal.ToDouble(x.MinPrice ?? 0),
-                        DatePoint = Convert(x.DatePoint)
+                        DatePoint = ConvertToTimeStamp(x.DatePoint)
                     })
                 }
             };
+        }
 
-            Timestamp Convert(DateTime timestamp)
+        Timestamp ConvertToTimeStamp(DateTime timestamp)
+        {
+            DateTimeOffset offset = timestamp;
+            return offset.ToTimestamp();
+        }
+
+        Pricing? MapPrice(PriceDto? price)
+        {
+            return price == null ? null : new Pricing
             {
-                DateTimeOffset offset = timestamp;
-                return offset.ToTimestamp();
-            }
+                MaxPrice = decimal.ToDouble(price.MaxPrice),
+                MinPrice = decimal.ToDouble(price.MinPrice)
+            };
         }
     }
 }

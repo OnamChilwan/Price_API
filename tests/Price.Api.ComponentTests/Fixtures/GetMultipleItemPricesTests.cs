@@ -26,7 +26,7 @@ public class GetMultipleItemPricesTests
             .When(s => _steps.GrpcRequestIsSent("next", "gb", "en", items))
             // .Then(s => _steps.AnOKHttpReponseIsReturned())
             .And(s => _steps.MultipleItemPricesAreReturned(items))
-            // .And(s => _steps.SaleInformationIsNotPresentForAllItems())
+            .And(s => _steps.SaleInformationIsNotPresentForAllItems())
             // .And(s => _steps.WasPriceIsNotPresentForAllItems())
             .BDDfy();
     }
