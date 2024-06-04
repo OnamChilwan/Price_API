@@ -33,8 +33,9 @@ public class PriceController : ControllerBase
     {
         var itemPrices = await _priceApplicationService.GetMultiplePrices(
             request.Realm,
-            request.Territory, 
-            "gold", 
+            request.Territory,
+            "gbp", // TODO: read from settings
+            "gold", // TODO: read from settings
             request.ItemNumber);
 
         var result = _mapper.Map<IEnumerable<ItemPriceDto>, IEnumerable<ItemPrice>>(itemPrices);

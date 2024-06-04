@@ -6,9 +6,20 @@ public class GetMultipleItemPriceRequestValidator : AbstractValidator<GetMultipl
 {
     public GetMultipleItemPriceRequestValidator()
     {
-        RuleFor(x => x.Language).NotNull();
-        RuleFor(x => x.Realm).NotNull();
-        RuleFor(x => x.Territory).NotNull();
-        RuleFor(x => x.ItemNumber).NotEmpty();
+        RuleFor(x => x.Language)
+            .NotNull()
+            .NotEmpty();
+        
+        RuleFor(x => x.Realm)
+            .NotNull()
+            .NotEmpty();
+        
+        RuleFor(x => x.Territory)
+            .NotNull()
+            .NotEmpty();
+        
+        RuleFor(x => x.ItemNumber)
+            .NotNull()
+            .NotEmpty();
     }
 }

@@ -1,7 +1,9 @@
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Price.Application.Decorators;
 using Price.Application.Services;
+using Price.GRPC.Api.Configuration;
 using Price.GRPC.Api.Endpoints;
 using Price.GRPC.Api.Validators;
 using Price.Infrastructure.Queries;
@@ -22,8 +24,8 @@ public class PriceProtoServiceTests
         
         _query = Substitute.For<IGetMultiplePricesQuery>();
         _decorator = Substitute.For<IDecorator>();
-        _priceApplicationService = new PriceApplicationService(_query, _decorator);
-        _subject = new PriceProtoService(validator, _priceApplicationService);
+        _priceApplicationService = new PriceApplicationService(_query, _decorator, Substitute.For<ILogger<PriceApplicationService>>());
+        _subject = new PriceProtoService(_priceApplicationService, new ApiSettings(), validator, Substitute.For<ILogger<PriceProtoService>>());
     }
 
     [Test]

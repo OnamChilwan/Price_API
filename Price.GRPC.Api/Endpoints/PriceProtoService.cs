@@ -1,87 +1,65 @@
 using FluentValidation;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Price.Application.DTOs;
+using Microsoft.Extensions.Logging;
 using Price.Application.Services;
+using Price.GRPC.Api.Configuration;
+using Price.GRPC.Api.Mappers;
+using Serilog.Core;
+using Serilog.Core.Enrichers;
 
 namespace Price.GRPC.Api.Endpoints;
 
 public class PriceProtoService(
+    PriceApplicationService priceApplicationService,
+    ApiSettings apiSettings,
     IValidator<GetMultipleItemPriceRequest> validator,
-    PriceApplicationService priceApplicationService) : PriceService.PriceServiceBase
+    ILogger<PriceProtoService> logger) : PriceService.PriceServiceBase
 {
-    public override async Task Get(GetMultipleItemPriceRequest request, IServerStreamWriter<ItemPrice> responseStream,
+    public override async Task Get(
+        GetMultipleItemPriceRequest request,
+        IServerStreamWriter<ItemPrice> responseStream,
         ServerCallContext context)
     {
-        var validationResult = await validator.ValidateAsync(request);
+        ILogEventEnricher[] enrichment =
+        [
+            new PropertyEnricher("ItemIds", request.ItemNumber),
+            new PropertyEnricher("Realm", request.Realm),
+            new PropertyEnricher("Territory", request.Territory),
+            new PropertyEnricher("Language", request.Language)
+        ];
 
-        if (!validationResult.IsValid)
+        var dictionary = new Dictionary<string, object>
         {
-            var errors = string.Join(',', validationResult.Errors);
-            throw new RpcException(new Status(StatusCode.InvalidArgument, errors), "Invalid Request");
-        }
+            { "ItemIds", request.ItemNumber },
+            { "Realm", request.Realm },
+            { "Territory", request.Territory },
+            { "Language", request.Language }
+        };
 
-        var itemPrices = await priceApplicationService.GetMultiplePrices(
-            request.Realm,
-            request.Territory,
-            "gold",
-            request.ItemNumber);
-
-        foreach (var item in Map(itemPrices))
+        using (logger.BeginScope(dictionary))
         {
-            await responseStream.WriteAsync(item);
-        }
-    }
+            var validationResult = await validator.ValidateAsync(request);
 
-    private static IEnumerable<ItemPrice> Map(IEnumerable<ItemPriceDto> items)
-    {
-        foreach (var item in items)
-        {
-            yield return new ItemPrice
+            if (!validationResult.IsValid)
             {
-                Territory = item.Territory,
-                ItemNumber = item.ItemNumber,
-                Dataset = item.Dataset,
-                Realm = item.Realm,
-                Id = item.Id,
-                CurrencyCode = item.CurrencyCode,
-                SalePrice = MapPrice(item.SalePrice),
-                WasPrice = MapPrice(item.WasPrice),
-                Price = MapPrice(item.Price),
-                Options =
-                {
-                    item.Options.Select(x => new Option
-                    {
-                        OptionNumber = x.OptionNumber,
-                        Price = decimal.ToDouble(x.Price),
-                        IsSalePrice = x.IsSalePrice
-                    })
-                },
-                PriceHistory =
-                {
-                    item.PriceHistory.Select(x => new History
-                    {
-                        MaxPrice = decimal.ToDouble(x.MaxPrice ?? 0),
-                        MinPrice = decimal.ToDouble(x.MinPrice ?? 0),
-                        DatePoint = ConvertToTimeStamp(x.DatePoint)
-                    })
-                }
-            };
-        }
+                var errors = string.Join(',', validationResult.Errors);
+                logger.LogInformation("Validation failed due to following errors {@Errors}", errors);
+                throw new RpcException(new Status(StatusCode.InvalidArgument, errors), "Invalid Request");
+            }
 
-        Timestamp ConvertToTimeStamp(DateTime timestamp)
-        {
-            DateTimeOffset offset = timestamp;
-            return offset.ToTimestamp();
-        }
+            logger.LogInformation("Validation is successful.");
 
-        Pricing? MapPrice(PriceDto? price)
-        {
-            return price == null ? null : new Pricing
+            var itemPrices = await priceApplicationService.GetMultiplePrices(
+                request.Realm,
+                request.Territory,
+                apiSettings.Currency,
+                apiSettings.DataSet,
+                request.ItemNumber);
+
+            foreach (var item in ItemPriceResponseMapper.Map(itemPrices))
             {
-                MaxPrice = decimal.ToDouble(price.MaxPrice),
-                MinPrice = decimal.ToDouble(price.MinPrice)
-            };
+                await responseStream.WriteAsync(item);
+            }
         }
     }
 }
