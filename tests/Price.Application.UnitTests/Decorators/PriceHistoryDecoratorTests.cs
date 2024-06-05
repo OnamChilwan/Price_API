@@ -18,7 +18,7 @@ public class PriceHistoryDecoratorTests
         _nextDecorator = new Mock<IDecorator>();
         var entities = new EntityBuilder().WithItems("123456").WithPriceHistory().Build();
         var itemNumbers = new[] { "123456" };
-        _context = DecoratorContext.Initialise(entities, itemNumbers);
+        _context = DecoratorContext.Initialise(entities, itemNumbers, "GBP", "gold");
     }
 
     [Test]
@@ -53,7 +53,7 @@ public class PriceHistoryDecoratorTests
     public async Task Sales_Is_Enabled_And_Item_Has_No_Price_History()
     {
         var subject = new PriceHistoryDecorator(_nextDecorator.Object, SalesFeature.Create(true));
-        var context = DecoratorContext.Initialise(new EntityBuilder().WithItems("123456").Build(), new []{ "123456" });
+        var context = DecoratorContext.Initialise(new EntityBuilder().WithItems("123456").Build(), new []{ "123456" }, "GBP", "gold");
         var items = await subject.Decorate(context);
 
         _nextDecorator.Verify(x => x.Decorate(context), Times.Once);

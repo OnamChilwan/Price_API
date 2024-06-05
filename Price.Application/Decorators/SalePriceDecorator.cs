@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Price.Application.DTOs;
 using Price.Application.Features;
 using Price.Infrastructure.Entities;
@@ -9,15 +10,18 @@ public class SalePriceDecorator : IDecorator
     private readonly IDecorator _decorator;
     private readonly SalesFeature _salesFeature;
     private readonly TimeMachineFeature _timeMachineFeature;
+    private readonly ILogger<SalePriceDecorator> _logger;
 
     public SalePriceDecorator(
         IDecorator decorator,
         SalesFeature salesFeature,
-        TimeMachineFeature timeMachineFeature)
+        TimeMachineFeature timeMachineFeature,
+        ILogger<SalePriceDecorator> logger)
     {
         _decorator = decorator;
         _salesFeature = salesFeature;
         _timeMachineFeature = timeMachineFeature;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<ItemPriceDto>> Decorate(DecoratorContext context)
@@ -26,12 +30,13 @@ public class SalePriceDecorator : IDecorator
 
         if (!_salesFeature.Enabled)
         {
+            _logger.LogInformation("Sales feature is disabled {flag} not applying sale price", _salesFeature.Enabled);
             return result;
         }
         
         foreach (var itemPrice in context.Entities)
         {
-            var activeSalePeriods = GetActiveSalePeriodsForOptions(itemPrice.Options, context);
+            var activeSalePeriods = GetActiveSalePeriodsForOptions(itemPrice.Options);
 
             if (!activeSalePeriods.Any())
             {
@@ -52,7 +57,7 @@ public class SalePriceDecorator : IDecorator
         return result;
     }
 
-    private IEnumerable<SalePricePeriodEntity> GetActiveSalePeriodsForOptions(IEnumerable<OptionEntity> options, DecoratorContext context)
+    private IEnumerable<SalePricePeriodEntity> GetActiveSalePeriodsForOptions(IEnumerable<OptionEntity> options)
     {
         var activeSalePricePeriods = new List<SalePricePeriodEntity>();
         

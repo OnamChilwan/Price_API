@@ -1,5 +1,5 @@
-using AutoMapper;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Price.Application.Decorators;
 using Price.Application.Services;
@@ -20,14 +20,12 @@ public class PriceProtoServiceTests
     [SetUp]
     public void Setup()
     {
-        var config = new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfiles()));
-        var mapper = new Mapper(config);
         var validator = new GetMultipleItemPriceRequestValidator();
         
         _query = Substitute.For<IGetMultiplePricesQuery>();
         _decorator = Substitute.For<IDecorator>();
-        _priceApplicationService = new PriceApplicationService(_query, _decorator);
-        _subject = new PriceProtoService(mapper, validator, _priceApplicationService);
+        _priceApplicationService = new PriceApplicationService(_query, _decorator, Substitute.For<ILogger<PriceApplicationService>>());
+        _subject = new PriceProtoService(_priceApplicationService, new ApiSettings(), validator, Substitute.For<ILogger<PriceProtoService>>());
     }
 
     [Test]

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
@@ -10,6 +10,8 @@
     <ItemGroup>
         <PackageReference Include="Bogus" Version="35.5.1" />
         <PackageReference Include="FluentAssertions" Version="6.12.0" />
+        <PackageReference Include="Grpc.Core.Testing" Version="2.46.6" />
+        <PackageReference Include="Grpc.Net.Client" Version="2.58.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.15" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.15" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
@@ -22,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Price.Api\Price.Api.csproj" />
+      <ProjectReference Include="..\..\Price.GRPC.Api\Price.GRPC.Api.csproj" />
     </ItemGroup>
 
 </Project>

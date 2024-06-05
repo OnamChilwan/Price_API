@@ -7,21 +7,19 @@ public class MapItemPriceDecorator : IDecorator
 {
     public Task<IEnumerable<ItemPriceDto>> Decorate(DecoratorContext context)
     {
-        var result = new List<ItemPriceDto>();
-
-        foreach (var entity in context.Entities)
-        {
-            result.Add(new ItemPriceDto(
-                entity.Id,
-                entity.ItemNumber,
-                entity.Realm,
-                entity.Territory,
+        var result = context
+            .Entities
+            .Select(entity => new ItemPriceDto(
+                entity.Id, 
+                entity.ItemNumber, 
+                entity.Realm, 
+                entity.Territory, 
                 entity.Dataset, // TODO: driven by settings
-                "GBP", // TODO: driven by settings
-                MapPrice(entity.Price.MinPrice, entity.Price.MaxPrice),
-                MapOptions(entity),
-                MapPriceHistory(entity)));
-        }
+                context.Currency,
+                MapPrice(entity.Price.MinPrice, entity.Price.MaxPrice), 
+                MapOptions(entity), 
+                MapPriceHistory(entity)))
+            .ToList();
 
         return Task.FromResult<IEnumerable<ItemPriceDto>>(result);
     }

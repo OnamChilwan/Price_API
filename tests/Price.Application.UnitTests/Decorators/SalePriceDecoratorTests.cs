@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using Price.Application.Decorators;
 using Price.Application.Features;
@@ -9,6 +11,8 @@ namespace Price.Application.UnitTests.Decorators;
 [TestFixture]
 public class SalePriceDecoratorTests
 {
+    private readonly ILogger<SalePriceDecorator> _logger = Substitute.For<ILogger<SalePriceDecorator>>();
+    
     [Test]
     public async Task Given_Feature_Not_Enabled_When_Decorating_Then_Sale_Price_Is_Not_Populated()
     {
@@ -16,9 +20,10 @@ public class SalePriceDecoratorTests
         var context = DecoratorContext.Initialise(new EntityBuilder()
             .WithItems("123456")
             .Build(), 
-            new []{ "123456" });
+            new []{ "123456" },
+            "GBP", "gold");
         
-        var subject = new SalePriceDecorator(nextDecorator.Object, SalesFeature.Default(), TimeMachineFeature.Default());
+        var subject = new SalePriceDecorator(nextDecorator.Object, SalesFeature.Default(), TimeMachineFeature.Default(), _logger);
         var result = await subject.Decorate(context);
         
         nextDecorator.Verify(x => x.Decorate(context), Times.Once);
@@ -39,8 +44,8 @@ public class SalePriceDecoratorTests
             .WithOptions()
             .WithNoActiveSalePeriods(now)
             .Build(), 
-            new []{ "123456" });
-        var subject = new SalePriceDecorator(nextDecorator.Object, SalesFeature.Create(true), TimeMachineFeature.Default());
+            new []{ "123456" }, "GBP", "gold");
+        var subject = new SalePriceDecorator(nextDecorator.Object, SalesFeature.Create(true), TimeMachineFeature.Default(), _logger);
         var result = await subject.Decorate(context);
         
         nextDecorator.Verify(x => x.Decorate(context), Times.Once);
@@ -59,9 +64,9 @@ public class SalePriceDecoratorTests
             .WithOptions()
             .WithSingleActiveSalePeriod(out var minPrice, out var maxPrice)
             .Build(),
-            new []{ "123456" });
+            new []{ "123456" }, "GBP", "gold");
         
-        var subject = new SalePriceDecorator(new MapItemPriceDecorator(), SalesFeature.Create(true), TimeMachineFeature.Default());
+        var subject = new SalePriceDecorator(new MapItemPriceDecorator(), SalesFeature.Create(true), TimeMachineFeature.Default(), _logger);
         var result = await subject.Decorate(context);
         
         result.First().SalePrice.Should().NotBeNull();
@@ -77,8 +82,8 @@ public class SalePriceDecoratorTests
             .WithOptions()
             .WithMultipleActiveSalePeriods(out var minPrice, out var maxPrice)
             .Build(),
-            new []{ "111111", "222222", "333333" });
-        var subject = new SalePriceDecorator(new MapItemPriceDecorator(), SalesFeature.Create(true), TimeMachineFeature.Default());
+            new []{ "111111", "222222", "333333" }, "GBP", "gold");
+        var subject = new SalePriceDecorator(new MapItemPriceDecorator(), SalesFeature.Create(true), TimeMachineFeature.Default(), _logger);
         var result = await subject.Decorate(context);
         
         result.First().SalePrice.Should().NotBeNull();

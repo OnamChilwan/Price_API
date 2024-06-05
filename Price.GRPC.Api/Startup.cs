@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Price.Application.Decorators;
-using Price.Application.DTOs;
 using Price.Application.Features;
 using Price.Application.Services;
 using Price.GRPC.Api.Endpoints;
@@ -47,8 +46,6 @@ public class Startup
         });
         services.AddGrpcReflection();
         
-        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
         services.AddScoped<IValidator<GetMultipleItemPriceRequest>, GetMultipleItemPriceRequestValidator>();
         
         // Decorators
@@ -58,21 +55,17 @@ public class Startup
         services.Decorate<IDecorator, MissingItemsDecorator>();
         
         services.AddTransient<PriceApplicationService>();
-
-        ConfigureMapper(services);
+        
         ConfigureFeatures(services);
     }
     
     protected virtual void ConfigureExternalDependencies(IServiceCollection services)
     {
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddTransient<IFeatureFlagRequestContext, DummyFeatureFlagRequestContext>();
         services.AddTransient<IGetMultiplePricesQuery, FakeGetMultiplePricesQuery>();
     }
     
-    private static void ConfigureMapper(IServiceCollection services)
-    {
-        services.AddAutoMapper(typeof(ItemPrice).Assembly, typeof(PriceDto).Assembly);
-    }
-
     private static void ConfigureFeatures(IServiceCollection services)
     {
         services.AddScoped(sp =>

@@ -25,7 +25,9 @@ public class MapItemPriceDecoratorTests
             .WithPriceHistory()
             .WithOptions()
             .Build(),
-            new []{ "123456" });
+            new []{ "123456" },
+            "GBP",
+            "gold");
         
         var items = await _subject.Decorate(context);
         var result = items.First();
@@ -54,7 +56,9 @@ public class MapItemPriceDecoratorTests
                 .WithItems("123456")
                 .WithPriceHistory()
                 .Build(),
-            new []{ "123456" });
+            new []{ "123456" },
+            "GBP",
+            "gold");
         var items = await _subject.Decorate(context);
         var result = items.First();
 
@@ -68,7 +72,9 @@ public class MapItemPriceDecoratorTests
             .WithItems("123456")
             .WithOptions()
             .Build(),
-            new []{ "123456" });
+            new []{ "123456" },
+            "GBP",
+            "gold");
         var items = await _subject.Decorate(context);
         var result = items.First();
 
@@ -79,7 +85,7 @@ public class MapItemPriceDecoratorTests
     [Ignore("Find out what output should be")]
     public async Task Given_There_Are_No_Items_Then_Empty_Object_Is_Returned()
     {
-        var context = DecoratorContext.Initialise(new EntityBuilder().Build(), Enumerable.Empty<string>());
+        var context = DecoratorContext.Initialise(new EntityBuilder().Build(), Enumerable.Empty<string>(),"GBP", "gold");
         var items = await _subject.Decorate(context);
         var result = items.First();
 

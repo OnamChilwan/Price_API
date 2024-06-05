@@ -70,7 +70,7 @@ public class Startup
 
     private static void ConfigureMapper(IServiceCollection services)
     {
-        services.AddAutoMapper(typeof(ItemPrice).Assembly, typeof(PriceDto).Assembly);
+        // services.AddAutoMapper(typeof(ItemPrice).Assembly, typeof(PriceDto).Assembly);
     }
 
     private static void ConfigureFeatures(IServiceCollection services)

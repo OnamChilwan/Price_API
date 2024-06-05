@@ -16,9 +16,11 @@ public class DecoratorContextTests
             .WithOptions()
             .Build();
         var itemNumbers = new[] { "1", "2" };
-        var subject = DecoratorContext.Initialise(entities, itemNumbers);
+        var subject = DecoratorContext.Initialise(entities, itemNumbers, "GBP", "gold");
 
         subject.RequestedItemNumbers.Should().BeEquivalentTo(itemNumbers);
         subject.Entities.Should().BeEquivalentTo(entities);
+        subject.Currency.Should().Be("GBP");
+        subject.Dataset.Should().Be("gold");
     }
 }
