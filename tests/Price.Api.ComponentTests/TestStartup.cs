@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Price.Application.Features;
+using Price.GRPC.Api.Configuration;
 using Price.Infrastructure.Queries;
 
 namespace Price.Api.ComponentTests;
@@ -17,7 +18,10 @@ public class TestStartup : GRPC.Api.Startup
     {
         services.AddSingleton<IFeatureFlagRequestContext>(_ => Substitute.For<IFeatureFlagRequestContext>());
         services.AddSingleton<IGetMultiplePricesQuery>(_ => Substitute.For<IGetMultiplePricesQuery>());
-    
+
+        var apiSettings = new ApiSettings { Currency = "GBP", DataSet = "gold" };
+        services.AddSingleton(apiSettings);
+        
         var context = Substitute.For<IHttpContextAccessor>();
         context.HttpContext.Returns(Substitute.For<HttpContext>());
         

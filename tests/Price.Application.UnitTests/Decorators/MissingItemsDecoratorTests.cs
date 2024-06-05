@@ -26,8 +26,8 @@ public class MissingItemsDecoratorTests
         result.First().PriceHistory.Should().BeEmpty();
         
         result.ElementAt(1).ItemNumber.Should().Be("999999");
-        result.ElementAt(1).Options.Should().BeNull();
-        result.ElementAt(1).PriceHistory.Should().BeNull();
+        result.ElementAt(1).Options.Should().BeEmpty();
+        result.ElementAt(1).PriceHistory.Should().BeEmpty();
     }
     
     [Test]

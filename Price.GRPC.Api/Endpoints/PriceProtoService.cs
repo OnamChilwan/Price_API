@@ -4,8 +4,6 @@ using Microsoft.Extensions.Logging;
 using Price.Application.Services;
 using Price.GRPC.Api.Configuration;
 using Price.GRPC.Api.Mappers;
-using Serilog.Core;
-using Serilog.Core.Enrichers;
 
 namespace Price.GRPC.Api.Endpoints;
 
@@ -20,14 +18,6 @@ public class PriceProtoService(
         IServerStreamWriter<ItemPrice> responseStream,
         ServerCallContext context)
     {
-        ILogEventEnricher[] enrichment =
-        [
-            new PropertyEnricher("ItemIds", request.ItemNumber),
-            new PropertyEnricher("Realm", request.Realm),
-            new PropertyEnricher("Territory", request.Territory),
-            new PropertyEnricher("Language", request.Language)
-        ];
-
         var dictionary = new Dictionary<string, object>
         {
             { "ItemIds", request.ItemNumber },

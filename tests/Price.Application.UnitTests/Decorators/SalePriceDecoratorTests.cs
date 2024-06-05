@@ -1,6 +1,5 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Price.Application.Decorators;
@@ -16,17 +15,17 @@ public class SalePriceDecoratorTests
     [Test]
     public async Task Given_Feature_Not_Enabled_When_Decorating_Then_Sale_Price_Is_Not_Populated()
     {
-        var nextDecorator = new Mock<IDecorator>();
+        var nextDecorator = Substitute.For<IDecorator>();
         var context = DecoratorContext.Initialise(new EntityBuilder()
             .WithItems("123456")
             .Build(), 
             new []{ "123456" },
             "GBP", "gold");
         
-        var subject = new SalePriceDecorator(nextDecorator.Object, SalesFeature.Default(), TimeMachineFeature.Default(), _logger);
+        var subject = new SalePriceDecorator(nextDecorator, SalesFeature.Default(), TimeMachineFeature.Default(), _logger);
         var result = await subject.Decorate(context);
         
-        nextDecorator.Verify(x => x.Decorate(context), Times.Once);
+        await nextDecorator.Received(1).Decorate(context);
 
         foreach (var itemPrice in result)
         {
@@ -37,7 +36,7 @@ public class SalePriceDecoratorTests
     [Test]
     public async Task Given_Feature_Is_Enabled_And_No_Sales_Periods_Exist_When_Decorating_Then_Sale_Price_Is_Not_Populated()
     {
-        var nextDecorator = new Mock<IDecorator>();
+        var nextDecorator = Substitute.For<IDecorator>();
         var now = DateTime.UtcNow;
         var context = DecoratorContext.Initialise(new EntityBuilder()
             .WithItems("123456")
@@ -45,10 +44,10 @@ public class SalePriceDecoratorTests
             .WithNoActiveSalePeriods(now)
             .Build(), 
             new []{ "123456" }, "GBP", "gold");
-        var subject = new SalePriceDecorator(nextDecorator.Object, SalesFeature.Create(true), TimeMachineFeature.Default(), _logger);
+        var subject = new SalePriceDecorator(nextDecorator, SalesFeature.Create(true), TimeMachineFeature.Default(), _logger);
         var result = await subject.Decorate(context);
         
-        nextDecorator.Verify(x => x.Decorate(context), Times.Once);
+        await nextDecorator.Received(1).Decorate(context);
         
         foreach (var itemPrice in result)
         {

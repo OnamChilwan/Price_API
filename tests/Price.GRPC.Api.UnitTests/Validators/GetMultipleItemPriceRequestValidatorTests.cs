@@ -10,8 +10,8 @@ public class GetMultipleItemPriceRequestValidatorTests
     {
         var subject = new GetMultipleItemPriceRequestValidator();
         var result = await subject.ValidateAsync(CreateRequest(territory, realm, language));
-
-        Assert.False(result.IsValid);
+        
+        Assert.That(result.IsValid, Is.False);
     }
 
    [TestCase("")]
@@ -21,7 +21,7 @@ public class GetMultipleItemPriceRequestValidatorTests
         var subject = new GetMultipleItemPriceRequestValidator();
         var result = await subject.ValidateAsync(CreateRequest(realm: realm));
 
-        Assert.False(result.IsValid);
+        Assert.That(result.IsValid, Is.False);
     }
     
     [TestCase("")]
@@ -31,7 +31,7 @@ public class GetMultipleItemPriceRequestValidatorTests
         var subject = new GetMultipleItemPriceRequestValidator();
         var result = await subject.ValidateAsync(CreateRequest(language: language));
 
-        Assert.False(result.IsValid);
+        Assert.That(result.IsValid, Is.False);
     }
     
     [TestCase("")]
@@ -41,7 +41,7 @@ public class GetMultipleItemPriceRequestValidatorTests
         var subject = new GetMultipleItemPriceRequestValidator();
         var result = await subject.ValidateAsync(CreateRequest(territory: territory));
 
-        Assert.False(result.IsValid);
+        Assert.That(result.IsValid, Is.False);
     }
 
     [Test]
@@ -50,7 +50,7 @@ public class GetMultipleItemPriceRequestValidatorTests
         var subject = new GetMultipleItemPriceRequestValidator();
         var result = await subject.ValidateAsync(CreateRequest(itemNumbers: []));
 
-        Assert.False(result.IsValid);
+        Assert.That(result.IsValid, Is.False);
     }
 
     private static GetMultipleItemPriceRequest CreateRequest(
