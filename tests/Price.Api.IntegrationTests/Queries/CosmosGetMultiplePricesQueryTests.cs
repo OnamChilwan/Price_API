@@ -1,8 +1,14 @@
+using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Dapr.Client;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Price.Infrastructure.Factories;
 using Price.Infrastructure.Queries;
+using Wrapr;
 
 namespace Price.Api.IntegrationTests.Queries;
 
@@ -27,5 +33,54 @@ public class CosmosGetMultiplePricesQueryTests : IntegrationTestsSetupFixture
         var result = await subject.Execute(new[] { id }, "gap");
 
         result.Should().NotBeEmpty();
+    }
+}
+
+public class QueryTests
+{
+    [Test]
+    public async Task Dapr_Query_Test()
+    {
+        var currentDirectory = Directory.GetParent(Directory.GetCurrentDirectory());
+        var componentPathInfo = TryGetComponentPath(currentDirectory);
+        await using var sidecar = new Sidecar("integration-test");
+        
+        try
+        {
+            await sidecar.Start(with => with
+                .ResourcesPath(componentPathInfo.FullName)
+                .DaprGrpcPort(1111)
+                .Args("--log-level", "warn"));
+        
+            using var client = new DaprClientBuilder()
+                .UseGrpcEndpoint("http://localhost:1234")
+                .Build();
+
+            var logger = LoggerFactory
+                .Create(b => b.AddConsole())
+                .CreateLogger<DaprGetMultiplePricesQuery>();
+            
+            var subject = new DaprGetMultiplePricesQuery(client, logger);
+
+            var result = await subject.Execute(new[] { "" }, "");
+        }
+        finally
+        {
+            await sidecar.Stop();    
+        }
+    }
+
+    private static DirectoryInfo TryGetComponentPath(DirectoryInfo? dir)
+    {
+        var result = dir
+            .GetDirectories()
+            .FirstOrDefault(x => x.Name.Equals("components"));
+        
+        if (result is null)
+        {
+            return TryGetComponentPath(dir.Parent);
+        }
+
+        return result;
     }
 }
